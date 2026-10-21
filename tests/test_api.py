@@ -18,11 +18,7 @@ def client():
     with app.test_client() as test_client:
         yield test_client
 
-
-# --------------------------------------------------
 # Перевірка авторизації
-# --------------------------------------------------
-
 def test_products_api_requires_login(client):
     response = client.get("/api/products")
 
@@ -72,10 +68,7 @@ def test_delete_product_requires_admin(client):
     assert response.status_code == 401
 
 
-# --------------------------------------------------
 # Перевірка доступу звичайного користувача
-# --------------------------------------------------
-
 def test_products_api_denies_regular_user_create(client):
     with client.session_transaction() as session:
         session["user_id"] = 2
@@ -122,10 +115,8 @@ def test_products_api_denies_regular_user_delete(client):
     assert response.status_code == 403
 
 
-# --------------------------------------------------
-# Перевірка формату запитів
-# --------------------------------------------------
 
+# Перевірка формату запитів
 def test_create_product_rejects_non_object_json(client):
     with client.session_transaction() as session:
         session["user_id"] = 1
@@ -158,10 +149,7 @@ def test_update_product_rejects_non_object_json(client):
     }
 
 
-# --------------------------------------------------
 # Перевірка читання товарів
-# --------------------------------------------------
-
 def test_products_api_returns_list_for_logged_in_user(client):
     with client.session_transaction() as session:
         session["user_id"] = 1
