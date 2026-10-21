@@ -27,12 +27,11 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(notifications_bp)
 
-    # Початкова адреса сайту завжди відкриває сторінку входу.
+
     @app.route("/")
     def index():
         return redirect(url_for("auth.login"))
 
-    # Головна сторінка доступна після авторизації.
     @app.route("/home")
     def home():
         if not session.get("user_id"):
