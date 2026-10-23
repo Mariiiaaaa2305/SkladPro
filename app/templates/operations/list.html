@@ -1,0 +1,120 @@
+
+{% extends "base.html" %}
+
+{% block title %}Складські операції | СкладPro{% endblock %}
+
+{% block content %}
+<section class="operations-page">
+
+    <div class="page-header">
+        <div>
+            <h1>Складські операції</h1>
+            <p>Облік надходження, відвантаження та списання товарів.</p>
+        </div>
+        <a class="button" href="{{ url_for('operations.create_operation') }}">
+            + Нова операція
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    {% set receipt_count = movements | selectattr('movement_type', 'equalto', 'receipt') | list | length %}
+    {% set shipment_count = movements | selectattr('movement_type', 'equalto', 'shipment') | list | length %}
+    {% set writeoff_count = movements | selectattr('movement_type', 'equalto', 'write_off') | list | length %}
+
+    <div class="operations-stats">
+        <div class="operation-stat-card">
+            <div class="operation-stat-icon">📥</div>
+            <div>
+                <h2>Надходження</h2>
+                <strong>{{ receipt_count }}</strong>
+            </div>
+        </div>
+
+        <div class="operation-stat-card">
+            <div class="operation-stat-icon">🚚</div>
+            <div>
+                <h2>Відвантаження</h2>
+                <strong>{{ shipment_count }}</strong>
+            </div>
+        </div>
+
+        <div class="operation-stat-card">
+            <div class="operation-stat-icon">📤</div>
+            <div>
+                <h2>Списання</h2>
+                <strong>{{ writeoff_count }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="operations-card">
+        <div class="operations-card-header">
+            <h2>Історія руху товарів</h2>
+            <span>{{ movements | length }} записів у списку</span>
+        </div>
+
+        {% if movements %}
+        <div class="operations-table-wrapper">
+            <table class="operations-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дата</th>
+                        <th>Товар</th>
+                        <th>Тип операції</th>
+                        <th>Кількість</th>
+                        <th>Ціна</th>
+                        <th>Деталі</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in movements %}
+                    <tr>
+                        <td>#{{ movement.id }}</td>
+                        <td>{{ movement.created_at }}</td>
+                        <td>
+                            <strong>{{ movement.product_name or '—' }}</strong><br>
+                            <small>{{ movement.sku or '—' }}</small>
+                        </td>
+                        <td>
+                            {% if movement.movement_type == 'receipt' %}
+                                <span class="operation-badge operation-receipt">Надходження</span>
+                            {% elif movement.movement_type == 'shipment' %}
+                                <span class="operation-badge operation-shipment">Відвантаження</span>
+                            {% elif movement.movement_type == 'write_off' %}
+                                <span class="operation-badge operation-write-off">Списання</span>
+                            {% else %}
+                                {{ movement.movement_type }}
+                            {% endif %}
+                        </td>
+                        <td>{{ movement.quantity }} шт.</td>
+                        <td>{{ movement.unit_price }} грн</td>
+                        <td>
+                            <a href="{{ url_for('operations.operation_detail', movement_id=movement.id) }}">
+                                Переглянути
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="operations-empty">
+            <div class="operations-empty-icon">📦</div>
+            <h3>Операцій поки немає</h3>
+            <p>Тут відображатиметься історія руху товарів.</p>
+            <a class="button" href="{{ url_for('operations.create_operation') }}">
+                Створити першу операцію
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+</section>
+{% endblock %}

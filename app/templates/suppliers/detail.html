@@ -1,0 +1,47 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ supplier.name }} | СкладPro{% endblock %}
+
+{% block content %}
+<section class="supplier-detail">
+    <div class="page-header">
+        <div>
+            <h1>{{ supplier.name }}</h1>
+            <p>Детальна інформація про постачальника.</p>
+        </div>
+
+        <a class="button button-secondary"
+           href="{{ url_for('suppliers.list_suppliers') }}">
+            Назад до списку
+        </a>
+    </div>
+
+    <div class="dashboard-card">
+        <h2>Контактна інформація</h2>
+
+        <div class="detail-list">
+            <p><strong>Назва:</strong> {{ supplier.name }}</p>
+            <p><strong>Контактна особа:</strong> {{ supplier.contact_person or '—' }}</p>
+            <p><strong>Телефон:</strong> {{ supplier.phone or '—' }}</p>
+            <p><strong>Електронна пошта:</strong> {{ supplier.email or '—' }}</p>
+            <p><strong>Адреса:</strong> {{ supplier.address or '—' }}</p>
+        </div>
+
+        <div class="form-actions">
+            <a class="button"
+               href="{{ url_for('suppliers.edit_supplier', supplier_id=supplier.id) }}">
+                Редагувати
+            </a>
+
+            <form method="POST"
+                  action="{{ url_for('suppliers.delete_supplier', supplier_id=supplier.id) }}"
+                  onsubmit="return confirm('Точно видалити цього постачальника?');">
+                <button type="submit" class="button button-danger">
+                    Видалити
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,49 @@
+
+{% extends "base.html" %}
+
+{% block title %}Адмін-панель | СкладPro{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <h1>Адміністративна панель</h1>
+
+    <p>Вітаємо, {{ session.get("username") }}!</p>
+    <p>
+        Тут ви можете керувати користувачами
+        та контролювати роботу системи складського обліку.
+    </p>
+
+    <div class="dashboard-cards">
+
+        <div class="dashboard-card">
+            <h2>👥 Користувачі</h2>
+            <p>
+                Перегляд облікових записів працівників
+                і керування їхніми ролями.
+            </p>
+            <a href="{{ url_for('admin.users') }}">
+                Керувати користувачами
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>📦 Товари</h2>
+            <p>
+                Керування товарами, артикулами
+                та мінімальними залишками.
+            </p>
+            <a href="/products">Переглянути товари</a>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>📊 Звіти</h2>
+            <p>
+                Контроль залишків, руху товарів
+                та вартості запасів.
+            </p>
+            <a href="/reports">Переглянути звіти</a>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Товари | СкладPro{% endblock %}
+
+{% block content %}
+<section class="products-page">
+    <div class="page-header">
+        <div>
+            <h1>Товари</h1>
+            <p>Каталог товарів і поточні складські залишки.</p>
+        </div>
+        <a class="button" href="{{ url_for('products.create_product') }}">
+            + Додати товар
+        </a>
+    </div>
+
+    <div class="filter-bar">
+        {% if low_stock_only %}
+            <p>Показано лише товари з низьким залишком.</p>
+            <a class="button button-secondary"
+               href="{{ url_for('products.list_products') }}">
+                Усі товари
+            </a>
+        {% else %}
+            <a class="button button-secondary"
+               href="{{ url_for('products.list_products', low_stock=1) }}">
+                Показати низькі залишки
+            </a>
+        {% endif %}
+    </div>
+
+    {% set messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    {% if products %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Назва</th>
+                        <th>Артикул</th>
+                        <th>Залишок</th>
+                        <th>Мінімум</th>
+                        <th>Ціна</th>
+                        <th>Статус</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.sku }}</td>
+                        <td>{{ product.quantity }}</td>
+                        <td>{{ product.min_quantity }}</td>
+                        <td>{{ "%.2f"|format(product.price) }}</td>
+                        <td>
+                            {% if product.quantity <= product.min_quantity %}
+                                <span class="status status-warning">Низький залишок</span>
+                            {% else %}
+                                <span class="status status-ok">У нормі</span>
+                            {% endif %}
+                        </td>
+                        <td class="table-actions">
+                            <a href="{{ url_for('products.product_detail', product_id=product.id) }}">
+                                Перегляд
+                            </a>
+                            <a href="{{ url_for('products.edit_product', product_id=product.id) }}">
+                                Редагувати
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        {% if low_stock_only %}
+            <p>Немає товарів із низьким залишком.</p>
+        {% else %}
+            <p>Каталог поки порожній. Додайте перший товар.</p>
+        {% endif %}
+    {% endif %}
+</section>
+{% endblock %}

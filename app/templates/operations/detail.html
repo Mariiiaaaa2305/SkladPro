@@ -1,0 +1,93 @@
+
+{% extends "base.html" %}
+
+{% block title %}Деталі операції №{{ movement.id }} | СкладPro{% endblock %}
+
+{% block content %}
+<section class="operations-page">
+
+    <div class="page-header">
+        <div>
+            <h1>Деталі операції №{{ movement.id }}</h1>
+            <p>Інформація про рух товару на складі.</p>
+        </div>
+        <a class="button button-secondary"
+           href="{{ url_for('operations.list_operations') }}">
+            ← До списку
+        </a>
+    </div>
+
+    <div class="operations-card">
+        <div class="operations-card-header">
+            <h2>Інформація про операцію</h2>
+
+            {% if movement.movement_type == 'receipt' %}
+                <span class="operation-badge operation-receipt">Надходження</span>
+            {% elif movement.movement_type == 'shipment' %}
+                <span class="operation-badge operation-shipment">Відвантаження</span>
+            {% elif movement.movement_type == 'write_off' %}
+                <span class="operation-badge operation-write-off">Списання</span>
+            {% else %}
+                <span class="operation-badge">{{ movement.movement_type }}</span>
+            {% endif %}
+        </div>
+
+        <div class="operation-details-grid">
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">Номер операції</span>
+                <strong>#{{ movement.id }}</strong>
+            </div>
+
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">Дата та час</span>
+                <strong>{{ movement.created_at or 'Не вказано' }}</strong>
+            </div>
+
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">Назва товару</span>
+                <strong>{{ movement.product_name or 'Не вказано' }}</strong>
+            </div>
+
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">Артикул</span>
+                <strong>{{ movement.sku or 'Не вказано' }}</strong>
+            </div>
+
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">Кількість</span>
+                <strong>{{ movement.quantity }} шт.</strong>
+            </div>
+
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">Ціна за одиницю</span>
+                <strong>{{ movement.unit_price }} грн</strong>
+            </div>
+
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">Загальна вартість</span>
+                <strong>
+                    {{ "%.2f"|format(movement.quantity * movement.unit_price) }} грн
+                </strong>
+            </div>
+
+            <div class="operation-detail-item">
+                <span class="operation-detail-label">ID користувача</span>
+                <strong>{{ movement.created_by or 'Не вказано' }}</strong>
+            </div>
+        </div>
+
+        <div class="operation-notes">
+            <span class="operation-detail-label">Примітки</span>
+            <p>{{ movement.notes or 'Примітки відсутні.' }}</p>
+        </div>
+
+        <div class="operations-detail-actions">
+            <a class="button"
+               href="{{ url_for('operations.list_operations') }}">
+                Повернутися до історії
+            </a>
+        </div>
+    </div>
+
+</section>
+{% endblock %}

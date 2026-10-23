@@ -1,0 +1,97 @@
+
+{% extends "base.html" %}
+
+{% block title %}Рух товарів | СкладPro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Рух товарів</h1>
+        <p>Історія складських операцій за вибраними параметрами.</p>
+    </div>
+    <a class="button button-secondary" href="{{ url_for('reports.index') }}">← До звітів</a>
+</div>
+
+<form method="get" class="report-filter">
+    <div class="form-group">
+        <label for="date_from">Дата від</label>
+        <input type="date" id="date_from" name="date_from" value="{{ date_from }}">
+    </div>
+
+    <div class="form-group">
+        <label for="date_to">Дата до</label>
+        <input type="date" id="date_to" name="date_to" value="{{ date_to }}">
+    </div>
+
+    <div class="form-group">
+        <label for="product_id">Товар</label>
+        <select id="product_id" name="product_id">
+            <option value="">Усі товари</option>
+            {% for product in products %}
+            <option value="{{ product.id }}"
+                {% if product_id|string == product.id|string %}selected{% endif %}>
+                {{ product.name }} ({{ product.sku }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="movement_type">Тип операції</label>
+        <select id="movement_type" name="movement_type">
+            <option value="">Усі типи</option>
+            <option value="receipt" {% if movement_type == 'receipt' %}selected{% endif %}>Надходження</option>
+            <option value="shipment" {% if movement_type == 'shipment' %}selected{% endif %}>Відвантаження</option>
+            <option value="write_off" {% if movement_type == 'write_off' %}selected{% endif %}>Списання</option>
+        </select>
+    </div>
+
+    <button class="button" type="submit">Застосувати фільтри</button>
+</form>
+
+<div class="operations-card">
+    <div class="operations-card-header">
+        <h2>Результати</h2>
+        <span>{{ rows|length }} операцій</span>
+    </div>
+
+    <div class="operations-table-wrapper">
+        <table class="operations-table">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Товар</th>
+                    <th>Тип</th>
+                    <th>Кількість</th>
+                    <th>Ціна</th>
+                    <th>Примітки</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in rows %}
+                <tr>
+                    <td>{{ item.created_at }}</td>
+                    <td>{{ item.product_name }} ({{ item.sku }})</td>
+                    <td>
+                        {% if item.movement_type == 'receipt' %}
+                            Надходження
+                        {% elif item.movement_type == 'shipment' %}
+                            Відвантаження
+                        {% else %}
+                            Списання
+                        {% endif %}
+                    </td>
+                    <td>{{ item.quantity }} шт.</td>
+                    <td>{{ item.unit_price }} грн</td>
+                    <td>{{ item.notes or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">За вибраними параметрами операцій немає.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

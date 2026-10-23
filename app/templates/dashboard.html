@@ -1,0 +1,49 @@
+
+{% extends "base.html" %}
+
+{% block title %}Головна | СкладPro{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <h1>Система управління складом</h1>
+    <p>Вітаємо у СкладPro — системі обліку товарів і складських операцій.</p>
+
+    <div class="dashboard-cards">
+        <div class="dashboard-card">
+            <h2>📦 Товарні позиції</h2>
+            <p class="stat-number">{{ statistics.total_products }}</p>
+            <p>Усього видів товарів у каталозі.</p>
+            <a class="button" href="{{ url_for('products.list_products') }}">
+                Переглянути товари
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>📊 Залишок на складі</h2>
+            <p class="stat-number">{{ statistics.total_quantity }}</p>
+            <p>Загальна кількість одиниць усіх товарів.</p>
+            <a class="button" href="{{ url_for('products.list_products') }}">
+                Переглянути залишки
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>⚠️ Низькі залишки</h2>
+            <p class="stat-number">{{ statistics.low_stock_products|length }}</p>
+            <p>Товари на рівні мінімального запасу або нижче.</p>
+            <a class="button"
+               href="{{ url_for('products.list_products', low_stock=1) }}">
+                Переглянути список
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>🚚 Постачальники</h2>
+            <p>Інформація про постачальників товарів.</p>
+            <a class="button" href="{{ url_for('suppliers.list_suppliers') }}">
+                Переглянути постачальників
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

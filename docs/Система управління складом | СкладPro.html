@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Система управління складом | СкладPro</title>
+
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container">
+            <a class="logo" href="/">
+                📦 СкладPro
+            </a>
+
+            <nav class="nav">
+                
+                    <a href="/">Головна</a>
+
+                    <a href="/products/">Товари</a>
+
+                    <a href="/products/?low_stock=1">Залишки</a>
+
+                    <a href="/suppliers/">Постачальники</a>
+
+                    <a href="/documents/">Документи</a>
+
+                    <a href="/reports">Звіти</a>
+
+                    
+                        <a href="/admin/">
+                            Працівники та адмін-панель
+                        </a>
+
+                        <a href="/auth/register">
+                            Реєстрація
+                        </a>
+                    
+
+                    <form method="POST"
+                          action="/auth/logout"
+                          class="logout-form">
+                        <button type="submit" class="logout-button">
+                            Вийти
+                        </button>
+                    </form>
+                
+            </nav>
+        </div>
+    </header>
+
+    <main class="container content">
+        
+<div class="container">
+    <h1>Документи</h1>
+
+    <p>
+        <a href="/documents/create">+ Створити документ</a>
+    </p>
+
+    
+        
+    
+
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Тип документа</th>
+                <th>Сума</th>
+                <th>Дата створення</th>
+                <th>Дія</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>2</td>
+                <td>
+                    
+                        Акт
+                    
+                </td>
+                <td>10000.00 грн</td>
+                <td>2026-10-20 13:28:59</td>
+                <td>
+                    <a href="/documents/2">
+                        Переглянути
+                    </a>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>1</td>
+                <td>
+                    
+                        Накладна
+                    
+                </td>
+                <td>600.00 грн</td>
+                <td>2026-10-20 13:26:20</td>
+                <td>
+                    <a href="/documents/1">
+                        Переглянути
+                    </a>
+                </td>
+            </tr>
+            
+        </tbody>
+    </table>
+    
+</div>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            Система управління складом © 2026
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+
+</body>
+</html>

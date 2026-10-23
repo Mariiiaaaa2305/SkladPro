@@ -1,0 +1,121 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    {% if supplier.get('id') %}
+        Редагування постачальника | СкладPro
+    {% else %}
+        Новий постачальник | СкладPro
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <div class="page-header">
+        <div>
+            <h1>
+                {% if supplier.get('id') %}
+                    Редагування постачальника
+                {% else %}
+                    Додавання постачальника
+                {% endif %}
+            </h1>
+            <p>Заповни контактну інформацію постачальника.</p>
+        </div>
+
+        <a class="button button-secondary"
+           href="{{ url_for('suppliers.list_suppliers') }}">
+            Назад до списку
+        </a>
+    </div>
+
+    {% if errors %}
+        <div class="alert alert-error">
+            <ul>
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST"
+          action="{% if supplier.get('id') %}
+                      {{ url_for('suppliers.edit_supplier', supplier_id=supplier.get('id')) }}
+                  {% else %}
+                      {{ url_for('suppliers.create_supplier') }}
+                  {% endif %}"
+          class="form-card">
+
+        <div class="form-group">
+            <label for="name">Назва постачальника *</label>
+            <input
+                type="text"
+                id="name"
+                name="name"
+                maxlength="150"
+                value="{{ supplier.get('name', '') }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="contact_person">Контактна особа</label>
+            <input
+                type="text"
+                id="contact_person"
+                name="contact_person"
+                maxlength="120"
+                value="{{ supplier.get('contact_person', '') }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Телефон</label>
+            <input
+                type="tel"
+                id="phone"
+                name="phone"
+                maxlength="30"
+                value="{{ supplier.get('phone', '') }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="email">Електронна пошта</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                maxlength="120"
+                value="{{ supplier.get('email', '') }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="address">Адреса</label>
+            <textarea
+                id="address"
+                name="address"
+                maxlength="255"
+                rows="3"
+            >{{ supplier.get('address', '') }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="button">
+                {% if supplier.get('id') %}
+                    Зберегти зміни
+                {% else %}
+                    Додати постачальника
+                {% endif %}
+            </button>
+
+            <a class="button button-secondary"
+               href="{{ url_for('suppliers.list_suppliers') }}">
+                Скасувати
+            </a>
+        </div>
+    </form>
+</section>
+{% endblock %}

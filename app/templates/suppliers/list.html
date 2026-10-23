@@ -1,0 +1,67 @@
+
+{% extends "base.html" %}
+
+{% block title %}Постачальники | СкладPro{% endblock %}
+
+{% block content %}
+<section class="suppliers-page">
+    <div class="page-header">
+        <div>
+            <h1>Постачальники</h1>
+            <p>Керування постачальниками та контактною інформацією.</p>
+        </div>
+
+        <a class="button" href="{{ url_for('suppliers.create_supplier') }}">
+            + Додати постачальника
+        </a>
+    </div>
+
+    {% set messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    {% if suppliers %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Назва</th>
+                        <th>Контактна особа</th>
+                        <th>Телефон</th>
+                        <th>Електронна пошта</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for supplier in suppliers %}
+                    <tr>
+                        <td>{{ supplier.name }}</td>
+                        <td>{{ supplier.contact_person or '—' }}</td>
+                        <td>{{ supplier.phone or '—' }}</td>
+                        <td>{{ supplier.email or '—' }}</td>
+                        <td class="table-actions">
+                            <a href="{{ url_for('suppliers.supplier_detail', supplier_id=supplier.id) }}">
+                                Перегляд
+                            </a>
+                            <a href="{{ url_for('suppliers.edit_supplier', supplier_id=supplier.id) }}">
+                                Редагувати
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="dashboard-card">
+            <h2>Постачальників поки немає</h2>
+            <p>Додай першого постачальника, щоб зберігати його контакти в системі.</p>
+            <a class="button" href="{{ url_for('suppliers.create_supplier') }}">
+                Додати постачальника
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

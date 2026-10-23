@@ -1,0 +1,108 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="documents-page">
+
+    <div class="documents-header">
+        <div>
+            <h1>Документи</h1>
+            <p>Керування накладними та актами</p>
+        </div>
+
+        <a class="document-create-button" href="/documents/create">
+            + Створити документ
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="document-message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="documents-stats">
+        <div class="document-stat-card">
+            <span>Усього документів</span>
+            <strong>{{ documents|length }}</strong>
+        </div>
+
+        <div class="document-stat-card">
+            <span>Накладні</span>
+            <strong>
+                {{ documents|selectattr('document_type', 'equalto', 'invoice')|list|length }}
+            </strong>
+        </div>
+
+        <div class="document-stat-card">
+            <span>Акти</span>
+            <strong>
+                {{ documents|selectattr('document_type', 'equalto', 'act')|list|length }}
+            </strong>
+        </div>
+    </div>
+
+    <div class="documents-table-card">
+        <div class="documents-table-header">
+            <h2>Список документів</h2>
+            <span>{{ documents|length }} записів</span>
+        </div>
+
+        {% if documents %}
+        <div class="documents-table-wrapper">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Тип документа</th>
+                        <th>Сума</th>
+                        <th>Дата створення</th>
+                        <th>Дія</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for document in documents %}
+                    <tr>
+                        <td>
+                            <strong>№ {{ document.document_number }}</strong>
+                        </td>
+
+                        <td>
+                            {% if document.document_type == 'invoice' %}
+                                <span class="document-type invoice">Накладна</span>
+                            {% else %}
+                                <span class="document-type act">Акт</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="document-amount">
+                            {{ "%.2f"|format(document.total_amount|float) }} грн
+                        </td>
+
+                        <td class="document-date">
+                            {{ document.created_at.strftime('%d.%m.%Y %H:%M') if document.created_at.strftime is defined else document.created_at }}
+                        </td>
+
+                        <td>
+                            <a class="document-view-link"
+                               href="/documents/{{ document.id }}">
+                                Переглянути →
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="documents-empty">
+                <h3>Документів поки немає</h3>
+                <p>Створи першу накладну або акт.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+```

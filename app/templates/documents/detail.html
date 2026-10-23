@@ -1,0 +1,54 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Документ № {{ document.document_number }}</h1>
+
+    <p>
+        {% if document.document_type == 'invoice' %}
+            Тип: Накладна
+        {% else %}
+            Тип: Акт
+        {% endif %}
+    </p>
+
+    <p>Дата створення: {{ document.created_at }}</p>
+    <p>Постачальник: {{ document.supplier_id or 'Не вказано' }}</p>
+    <p>Контрагент: {{ document.contractor_id or 'Не вказано' }}</p>
+    <p>Примітки: {{ document.notes or 'Немає' }}</p>
+
+    <h2>Товари</h2>
+
+    {% if document['items'] %}
+    <table>
+        <thead>
+            <tr>
+                <th>Артикул</th>
+                <th>Назва</th>
+                <th>Кількість</th>
+                <th>Ціна</th>
+                <th>Сума</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in document['items'] %}
+            <tr>
+                <td>{{ item.sku }}</td>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.unit_price }} грн</td>
+                <td>{{ item.line_total }} грн</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Товарів у документі немає.</p>
+    {% endif %}
+
+    <h2>Загальна сума: {{ document.total_amount }} грн</h2>
+
+    <p><a href="/documents/">Назад до документів</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,172 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}Керування користувачами | СкладPro{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <h1>Керування користувачами</h1>
+    <p>Створення облікових записів і керування ролями працівників.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message message-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="dashboard-card">
+        <h2>Створити менеджера</h2>
+
+        <form method="POST" action="{{ url_for('admin.users') }}">
+            <input type="hidden" name="action" value="create_user">
+
+            <label for="username">Логін</label>
+            <input
+                id="username"
+                name="username"
+                type="text"
+                minlength="3"
+                maxlength="50"
+                autocomplete="off"
+                required
+            >
+
+            <label for="password">Пароль</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <label for="confirm_password">Повторіть пароль</label>
+            <input
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <button type="submit">Створити менеджера</button>
+        </form>
+    </div>
+
+    <div class="dashboard-card">
+        <h2>Облікові записи</h2>
+
+        {% if users %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Логін</th>
+                            <th>Роль</th>
+                            <th>Статус</th>
+                            <th>Дія</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+
+                                <td>
+                                    {% if user.role == "admin" %}
+                                        Адміністратор
+                                    {% else %}
+                                        Менеджер
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if user.is_active %}
+                                        Активний
+                                    {% else %}
+                                        Неактивний
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if user.id != session.get("user_id") %}
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('admin.users') }}"
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="action"
+                                                value="update_role"
+                                            >
+
+                                            <input
+                                                type="hidden"
+                                                name="user_id"
+                                                value="{{ user.id }}"
+                                            >
+
+                                            <select name="role" required>
+                                                <option
+                                                    value="manager"
+                                                    {% if user.role == "manager" %}selected{% endif %}
+                                                >
+                                                    Менеджер
+                                                </option>
+
+                                                <option
+                                                    value="admin"
+                                                    {% if user.role == "admin" %}selected{% endif %}
+                                                >
+                                                    Адміністратор
+                                                </option>
+                                            </select>
+
+                                            <button type="submit">
+                                                Зберегти роль
+                                            </button>
+                                        </form>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('admin.toggle_user_active', user_id=user.id) }}"
+                                        >
+                                            <button type="submit">
+                                                {% if user.is_active %}
+                                                    Деактивувати
+                                                {% else %}
+                                                    Активувати
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span>Поточний акаунт</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Користувачів поки немає.</p>
+        {% endif %}
+    </div>
+
+    <p>
+        <a href="{{ url_for('admin.dashboard') }}">
+            ← Повернутися до адмінпанелі
+        </a>
+    </p>
+</section>
+{% endblock %}
+```

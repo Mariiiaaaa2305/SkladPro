@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід до складу | СкладPro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+    <main class="auth-container">
+        <section class="login-card">
+            <div class="auth-logo">📦</div>
+            <p class="auth-brand">СкладPro</p>
+            <h1>Вхід до складу</h1>
+            <p class="auth-description">
+                Увійдіть до свого облікового запису, щоб продовжити роботу.
+            </p>
+
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <label for="username">Логін</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Введіть свій логін"
+                    autocomplete="username"
+                    required
+                >
+
+                <label for="password">Пароль</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Введіть пароль"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button class="auth-button" type="submit">
+                    Увійти до складу
+                </button>
+            </form>
+
+            <div class="auth-switch">
+                <span>Ще не маєте акаунта?</span>
+                <a href="{{ url_for('auth.register') }}">Зареєструватися</a>
+            </div>
+        </section>
+
+        <p class="auth-footer">
+            СкладPro · Система управління складом
+        </p>
+    </main>
+</body>
+</html>

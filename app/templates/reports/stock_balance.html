@@ -1,0 +1,55 @@
+
+{% extends "base.html" %}
+
+{% block title %}Залишки на дату | СкладPro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Залишки на дату</h1>
+        <p>Історичний стан складу.</p>
+    </div>
+    <a class="button button-secondary" href="{{ url_for('reports.index') }}">← До звітів</a>
+</div>
+
+<form method="get" class="report-filter">
+    <div class="form-group">
+        <label for="date">Дата звіту</label>
+        <input type="date" id="date" name="date" value="{{ report_date }}" required>
+    </div>
+    <button class="button" type="submit">Сформувати</button>
+</form>
+
+<div class="operations-card">
+    <div class="operations-table-wrapper">
+        <table class="operations-table">
+            <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Артикул</th>
+                    <th>Залишок</th>
+                    <th>Мінімум</th>
+                    <th>Ціна</th>
+                    <th>Вартість залишку</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in rows %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.sku }}</td>
+                    <td>{{ item.quantity_at_date }} шт.</td>
+                    <td>{{ item.min_quantity }} шт.</td>
+                    <td>{{ item.price }} грн</td>
+                    <td>{{ "%.2f"|format(item.value_at_date) }} грн</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">Товарів для відображення немає.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+
+{% extends "base.html" %}
+
+{% block title %}Звіти | СкладPro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Звіти</h1>
+        <p>Аналітика залишків, руху товарів та вартості запасів.</p>
+    </div>
+</div>
+
+<div class="report-cards">
+    <a class="report-card" href="{{ url_for('reports.stock_balance') }}">
+        <div class="report-icon">📦</div>
+        <h2>Залишки на дату</h2>
+        <p>Перегляд кількості товарів, мінімального запасу та вартості на вибрану дату.</p>
+        <span>Відкрити звіт →</span>
+    </a>
+
+    <a class="report-card" href="{{ url_for('reports.stock_movements') }}">
+        <div class="report-icon">🔄</div>
+        <h2>Рух товарів</h2>
+        <p>Аналіз надходжень, відвантажень і списань за період.</p>
+        <span>Відкрити звіт →</span>
+    </a>
+
+    <a class="report-card" href="{{ url_for('reports.stock_valuation') }}">
+        <div class="report-icon">💰</div>
+        <h2>Фінансова оцінка</h2>
+        <p>Поточна вартість складських запасів за цінами товарів.</p>
+        <span>Відкрити звіт →</span>
+    </a>
+</div>
+{% endblock %}

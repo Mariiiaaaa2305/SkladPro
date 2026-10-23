@@ -1,0 +1,115 @@
+
+{% extends "base.html" %}
+
+{% block title %}Фінансова оцінка | СкладPro{% endblock %}
+
+{% block content %}
+<section class="operations-page">
+
+    <div class="page-header">
+        <div>
+            <h1>Фінансова оцінка запасів</h1>
+            <p>
+                Поточна вартість товарів на складі
+                за цінами, зазначеними в картках товарів.
+            </p>
+        </div>
+
+        <a class="button button-secondary"
+           href="{{ url_for('reports.index') }}">
+            ← До звітів
+        </a>
+    </div>
+
+    <div class="operations-stats">
+        <div class="operation-stat-card">
+            <div class="operation-stat-icon">💰</div>
+
+            <div>
+                <h2>Загальна вартість запасів</h2>
+                <strong>
+                    {{ "%.2f"|format(report["total_value"]) }} грн
+                </strong>
+            </div>
+        </div>
+
+        <div class="operation-stat-card">
+            <div class="operation-stat-icon">📦</div>
+
+            <div>
+                <h2>Кількість найменувань</h2>
+                <strong>{{ report["items"]|length }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="operations-card">
+        <div class="operations-card-header">
+            <div>
+                <h2>Вартість товарних залишків</h2>
+                <p>Кількість × ціна за одиницю</p>
+            </div>
+        </div>
+
+        <div class="operations-table-wrapper">
+            <table class="operations-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Назва товару</th>
+                        <th>Артикул</th>
+                        <th>Кількість</th>
+                        <th>Ціна за одиницю</th>
+                        <th>Загальна вартість</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in report["items"] %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ item["name"] }}</td>
+                        <td>{{ item["sku"] }}</td>
+                        <td>{{ item["quantity"] }} шт.</td>
+                        <td>
+                            {{ "%.2f"|format(item["price"] or 0) }} грн
+                        </td>
+                        <td>
+                            <strong>
+                                {{ "%.2f"|format(item["total_value"] or 0) }} грн
+                            </strong>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">
+                            Товарів для відображення немає.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td colspan="5" style="text-align: right;">
+                            <strong>Усього:</strong>
+                        </td>
+                        <td>
+                            <strong>
+                                {{ "%.2f"|format(report["total_value"]) }} грн
+                            </strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">
+        Примітка: звіт розраховує поточну вартість запасів
+        за ціною товару в каталозі. Це не обов'язково дорівнює
+        бухгалтерській собівартості.
+    </p>
+
+</section>
+{% endblock %}

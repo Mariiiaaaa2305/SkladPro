@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Система управління складом | СкладPro{% endblock %}</title>
+
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container">
+            <a class="logo" href="/">
+                📦 СкладPro
+            </a>
+
+            <nav class="nav">
+                {% if session.get("user_id") %}
+                    <a href="{{ url_for('home') }}">Головна</a>
+
+                    <a href="/products/">Товари</a>
+
+                    <a href="/products/?low_stock=1">Залишки</a>
+
+                    <a href="/suppliers/">Постачальники</a>
+
+                    <a href="/documents/">Документи</a>
+
+                    <a href="/notifications/">Сповіщення</a>
+
+                    <a href="/operations/">Складські операції</a>
+
+                    <a href="/reports">Звіти</a>
+
+                    {% if session.get("role") == "admin" %}
+                        <a href="/admin/">
+                            Працівники та адмін-панель
+                        </a>
+
+                        <a href="/auth/register">
+                            Реєстрація
+                        </a>
+                    {% endif %}
+
+                    <form method="POST"
+                          action="/auth/logout"
+                          class="logout-form">
+                        <button type="submit" class="logout-button">
+                            Вийти
+                        </button>
+                    </form>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            Система управління складом © 2026
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} | СкладPro{% endblock %}
+
+{% block content %}
+<section class="product-detail-page">
+    <div class="page-header">
+        <div>
+            <h1>{{ product.name }}</h1>
+            <p>Артикул: {{ product.sku }}</p>
+        </div>
+        <div class="form-actions">
+            <a class="button"
+               href="{{ url_for('products.edit_product', product_id=product.id) }}">
+                Редагувати
+            </a>
+            <a class="button button-secondary"
+               href="{{ url_for('products.list_products') }}">
+                До списку
+            </a>
+        </div>
+    </div>
+
+    {% set messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    <div class="dashboard-card product-details">
+        <h2>Інформація про товар</h2>
+
+        <dl class="details-list">
+            <dt>Назва</dt>
+            <dd>{{ product.name }}</dd>
+
+            <dt>Артикул</dt>
+            <dd>{{ product.sku }}</dd>
+
+            <dt>Опис</dt>
+            <dd>{{ product.description or 'Опис не вказано' }}</dd>
+
+            <dt>Кількість на складі</dt>
+            <dd>{{ product.quantity }}</dd>
+
+            <dt>Мінімальний залишок</dt>
+            <dd>{{ product.min_quantity }}</dd>
+
+            <dt>Ціна за одиницю</dt>
+            <dd>{{ "%.2f"|format(product.price) }}</dd>
+
+            <dt>Статус залишку</dt>
+            <dd>
+                {% if product.quantity <= product.min_quantity %}
+                    <span class="status status-warning">Низький залишок</span>
+                {% else %}
+                    <span class="status status-ok">У нормі</span>
+                {% endif %}
+            </dd>
+
+            <dt>Дата створення</dt>
+            <dd>{{ product.created_at or 'Не вказано' }}</dd>
+
+            <dt>Останнє оновлення</dt>
+            <dd>{{ product.updated_at or 'Не вказано' }}</dd>
+        </dl>
+    </div>
+
+    <div class="danger-zone">
+        <h2>Видалення товару</h2>
+        <p>Видалення неможливо буде скасувати. Товар, який уже використовується в документах або складських операціях, система не дозволить видалити.</p>
+
+        <form method="POST"
+              action="{{ url_for('products.delete_product', product_id=product.id) }}"
+              onsubmit="return confirm('Ви справді хочете видалити цей товар?');">
+            <button type="submit" class="button button-danger">
+                Видалити товар
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}
