@@ -11,332 +11,50 @@
 - **Адміністратор** (`admin`) — усе, що вміє менеджер, плюс керування користувачами та доступ до JSON API на запис.
 - **Система** — внутрішній актор: автоматично створює сповіщення про низький залишок.
 
-```mermaid
-flowchart LR
-    M([Менеджер])
-    A([Адміністратор])
-    S([Система])
-    A -. успадковує .-> M
+![Діаграма варіантів використання системи СкладPro](images/use-case-diagram.png)
 
-    subgraph Доступ
-        UC1(Увійти в систему)
-        UC2(Вийти з системи)
-    end
-    subgraph Товари
-        UC3(Переглянути товари)
-        UC4(Показати товари з низьким залишком)
-        UC5(Додати товар)
-        UC6(Редагувати товар)
-        UC7(Видалити товар)
-    end
-    subgraph Постачальники
-        UC8(Переглянути постачальників)
-        UC9(Додати / редагувати / видалити постачальника)
-    end
-    subgraph OPS [Складські операції]
-        UC10(Оприбуткувати товар)
-        UC11(Відвантажити товар)
-        UC12(Списати товар)
-        UC13(Переглянути історію операцій)
-        UC14(Перевірити достатність залишку)
-    end
-    subgraph Документи
-        UC15(Сформувати накладну)
-        UC16(Сформувати акт)
-        UC17(Переглянути документи)
-    end
-    subgraph Звіти
-        UC18(Стан складу на дату)
-        UC19(Динаміка руху товарів)
-        UC20(Фінансова оцінка залишків)
-    end
-    subgraph Сповіщення
-        UC21(Переглянути сповіщення)
-        UC22(Позначити сповіщення прочитаним)
-        UC23(Створити сповіщення про мінімальний запас)
-    end
-    subgraph Адміністрування
-        UC24(Створити обліковий запис менеджера)
-        UC25(Змінити роль користувача)
-        UC26(Активувати / деактивувати акаунт)
-        UC27(Керувати товарами через JSON API)
-    end
-
-    M --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7
-    M --> UC8 & UC9
-    M --> UC10 & UC11 & UC12 & UC13
-    M --> UC15 & UC16 & UC17
-    M --> UC18 & UC19 & UC20
-    M --> UC21 & UC22
-    A --> UC24 & UC25 & UC26 & UC27
-    S --> UC23
-
-    UC11 -. include .-> UC14
-    UC12 -. include .-> UC14
-    UC10 -. include .-> UC23
-    UC11 -. include .-> UC23
-    UC12 -. include .-> UC23
-```
+*Рисунок 1 – Діаграма варіантів використання системи «СкладPro»*
 
 **Пояснення:**
-- Адміністратор успадковує всі сценарії менеджера; додатково має сторінку `/admin` і право створювати, змінювати й видаляти товари через `/api/products`.
-- Відвантаження та списання *включають* перевірку достатності залишку (`UC14`): якщо товару менше, ніж потрібно, операція відхиляється.
-- Після кожної операції система перевіряє залишок і за потреби створює сповіщення (`UC23`). Так само це відбувається після створення й редагування товару.
+- Адміністратор успадковує всі сценарії менеджера (стрілка узагальнення на діаграмі); додатково керує користувачами (перегляд, створення, зміна ролі, активація/деактивація) і може керувати товарами через REST API (`/api/products`). Менеджер лише переглядає товари через REST API.
+- Відвантаження та списання *включають* (`«include»`) перевірку достатності залишку: якщо товару менше, ніж потрібно, операція відхиляється. Створення накладної або акта включає перевірку даних документа.
+- Формування сповіщення про низький залишок — сценарій актора **Система**. Він *розширює* (`«extend»`) оформлення надходження, відвантаження й списання, а також додавання та редагування товару, і виконується лише за умови «залишок товару ≤ мінімального запасу».
+- Позначення сповіщення прочитаним розширює перегляд сповіщень.
 - Накладна й акт зберігаються разом із позиціями та сумою; залишки змінюються лише складськими операціями.
-- Самостійної реєстрації немає: облікові записи менеджерів створює адміністратор.
+- Самостійної реєстрації немає: облікові записи створює адміністратор.
 
 ## 2. Діаграма класів
 
-Діаграму розбито на три частини: (2.1) сутності, (2.2) GoF-патерни, (2.3) шари застосунку. Разом вони описують систему в цілому.
+Діаграма класів описує систему в цілому: сутності предметної області, GoF-патерни, сервісний шар і репозиторії. Колір класу показує його роль (легенду наведено на самій діаграмі).
 
-### 2.1 Сутності предметної області
+![Діаграма класів системи СкладPro](images/class-diagram.png)
 
-Сутності реалізовані класами в `app/models/` (з `from_dict` / `to_dict`) і таблицями MySQL у `database/schema.sql`.
+*Рисунок 2 – Діаграма класів системи «СкладPro»*
 
-```mermaid
-classDiagram
-    class User {
-        +id
-        +username
-        +password_hash
-        +role
-        +is_active
-        +check_password(password)
-        +is_admin()
-    }
-    class Supplier {
-        +id
-        +name
-        +contact_person
-        +phone
-        +email
-        +address
-    }
-    class Contractor {
-        +id
-        +name
-        +contractor_type
-        +phone
-        +email
-        +address
-    }
-    class Product {
-        +id
-        +name
-        +sku
-        +description
-        +quantity
-        +min_quantity
-        +price
-        +is_low_stock()
-    }
-    class StockMovement {
-        +id
-        +movement_type
-        +quantity
-        +unit_price
-        +notes
-        +created_at
-    }
-    class Document {
-        +id
-        +document_number
-        +document_type
-        +total_amount
-        +notes
-        +created_at
-    }
-    class DocumentItem {
-        +quantity
-        +unit_price
-    }
-    class Notification {
-        +id
-        +message
-        +is_read
-        +created_at
-    }
+> Діаграма велика: на GitHub натисніть на зображення, щоб відкрити його в повному розмірі.
 
-    Supplier "0..1" <-- "*" Product : постачальник
-    Product "1" <-- "*" StockMovement : рух
-    User "0..1" <-- "*" StockMovement : виконав
-    Document "1" *-- "*" DocumentItem : позиції
-    Product "1" <-- "*" DocumentItem
-    Contractor "0..1" <-- "*" Document
-    Supplier "0..1" <-- "*" Document
-    User "0..1" <-- "*" Document : створив
-    Product "1" <-- "*" Notification
-```
-
-### 2.2 GoF-патерни (кольорами позначено патерни)
-
-| Колір | Патерн |
+| Колір | Що позначає |
 |---|---|
 | жовтий | Strategy |
 | фіолетовий | Command |
 | рожевий | Facade |
-| помаранчевий | Factory Method |
-| коричневий | Simple Factory |
+| коричневий | Factory (Simple Factory: `StockMovementStrategyFactory`, `DocumentFactory`; Factory Method: `DocumentCreator`, `InvoiceCreator`, `ActCreator`) |
 | зелений | Observer |
+| синій | сутності предметної області (не GoF) |
+| сірий | сервіси прикладного шару |
+| білий | репозиторії (доступ до MySQL) |
 
-```mermaid
-classDiagram
-    %% ── Strategy: правило зміни залишку ──
-    class StockMovementStrategy {
-        <<abstract>>
-        +calculate_new_quantity(current, quantity)
-    }
-    class ReceiptStrategy
-    class ShipmentStrategy
-    class WriteOffStrategy
-    StockMovementStrategy <|-- ReceiptStrategy
-    StockMovementStrategy <|-- ShipmentStrategy
-    StockMovementStrategy <|-- WriteOffStrategy
-    class StockMovementStrategyFactory {
-        +get_strategy(movement_type)
-    }
-    StockMovementStrategyFactory ..> StockMovementStrategy : створює
+### 2.1 Сутності предметної області
 
-    %% ── Command: складська операція як об'єкт ──
-    class StockMovementCommand {
-        <<abstract>>
-        +movement_type
-        +execute()
-    }
-    class ReceiptCommand
-    class ShipmentCommand
-    class WriteOffCommand
-    StockMovementCommand <|-- ReceiptCommand
-    StockMovementCommand <|-- ShipmentCommand
-    StockMovementCommand <|-- WriteOffCommand
+Сутності (`User`, `Supplier`, `Contractor`, `Product`, `StockMovement`, `Document`, `DocumentItem`, `Notification`) реалізовані класами в `app/models/` (з `from_dict` / `to_dict`) і таблицями MySQL у `database/schema.sql`. Зв'язки між ними показано в нижній частині діаграми класів.
 
-    %% ── Facade ──
-    class InventoryFacade {
-        +COMMANDS
-        +create_movement(type, product_id, quantity, price)
-        +get_products()
-        +get_movements()
-    }
-    InventoryFacade ..> StockMovementCommand : створює і виконує
+### 2.2 GoF-патерни
 
-    %% ── Factory Method: документи ──
-    class DocumentCreator {
-        <<abstract>>
-        +create_document(data)
-    }
-    class InvoiceCreator
-    class ActCreator
-    DocumentCreator <|-- InvoiceCreator
-    DocumentCreator <|-- ActCreator
-    class DocumentFactory {
-        +get_creator(document_type)
-    }
-    DocumentFactory ..> DocumentCreator : обирає
-
-    %% ── Observer: низький залишок ──
-    class StockSubject {
-        +subscribe(observer)
-        +unsubscribe(observer)
-        +notify(product_id, name, quantity, min_quantity)
-    }
-    class StockObserver {
-        <<abstract>>
-        +update(product_id, name, quantity, min_quantity)
-    }
-    class LowStockObserver {
-        +update(...)
-    }
-    StockObserver <|-- LowStockObserver
-    StockSubject o-- StockObserver
-
-    %% ── Сервіси, що зв'язують патерни ──
-    class InventoryService {
-        +create_stock_movement(...)
-    }
-    class StockRepository {
-        +create_movement(...)
-    }
-    class NotificationService {
-        +create_low_stock_notification(...)
-    }
-    class DocumentService {
-        +create_document(...)
-    }
-    StockMovementCommand ..> InventoryService : execute()
-    InventoryService ..> StockRepository
-    StockRepository ..> StockMovementStrategyFactory
-    InventoryService o-- StockSubject
-    LowStockObserver ..> NotificationService
-    DocumentService ..> DocumentFactory
-
-    style StockMovementStrategy fill:#fff9c4,stroke:#555,color:#000
-    style ReceiptStrategy fill:#fff9c4,stroke:#555,color:#000
-    style ShipmentStrategy fill:#fff9c4,stroke:#555,color:#000
-    style WriteOffStrategy fill:#fff9c4,stroke:#555,color:#000
-    style StockMovementStrategyFactory fill:#d7ccc8,stroke:#555,color:#000
-    style StockMovementCommand fill:#e1bee7,stroke:#555,color:#000
-    style ReceiptCommand fill:#e1bee7,stroke:#555,color:#000
-    style ShipmentCommand fill:#e1bee7,stroke:#555,color:#000
-    style WriteOffCommand fill:#e1bee7,stroke:#555,color:#000
-    style InventoryFacade fill:#f8bbd0,stroke:#555,color:#000
-    style DocumentCreator fill:#ffe0b2,stroke:#555,color:#000
-    style InvoiceCreator fill:#ffe0b2,stroke:#555,color:#000
-    style ActCreator fill:#ffe0b2,stroke:#555,color:#000
-    style DocumentFactory fill:#d7ccc8,stroke:#555,color:#000
-    style StockSubject fill:#c8e6c9,stroke:#555,color:#000
-    style StockObserver fill:#c8e6c9,stroke:#555,color:#000
-    style LowStockObserver fill:#c8e6c9,stroke:#555,color:#000
-```
+Патерни розташовані у верхній і правій частинах діаграми; докладний опис — у розділі 3.
 
 ### 2.3 Шари застосунку
 
 Маршрути (`app/routes/*`) викликають сервіси, фасад або репозиторії; доступ до MySQL є лише в репозиторіях (`app/repositories/*`).
-
-```mermaid
-classDiagram
-    direction TB
-    class InventoryService {
-        +керування_товарами()
-        +create_stock_movement()
-        +get_dashboard_statistics()
-    }
-    class DocumentService {
-        +create_document()
-        +get_documents()
-        +get_document()
-    }
-    class ReportService {
-        +get_stock_balance(date)
-        +get_stock_movements(filters)
-        +get_stock_valuation()
-    }
-    class NotificationService {
-        +create_low_stock_notification()
-        +get_notifications()
-        +mark_as_read()
-    }
-    class AuthService {
-        +login(username, password)
-    }
-    class ProductRepository
-    class StockRepository
-    class MovementRepository
-    class DocumentRepository
-    class ReportRepository
-    class NotificationRepository
-    class UserRepository
-    class SupplierRepository
-    class ContractorRepository
-
-    InventoryService ..> ProductRepository
-    InventoryService ..> StockRepository
-    InventoryService ..> MovementRepository
-    InventoryService ..> NotificationService
-    DocumentService ..> DocumentRepository
-    ReportService ..> ReportRepository
-    NotificationService ..> NotificationRepository
-    AuthService ..> UserRepository
-```
 
 | Компонент | Використовує |
 |---|---|
@@ -367,37 +85,9 @@ classDiagram
 **Як шаблони працюють разом (документ):**
 `DocumentService` перевіряє позиції та рахує суму → `DocumentFactory` обирає `InvoiceCreator` або `ActCreator` → творець виставляє тип документа → `DocumentRepository` зберігає документ і позиції в одній транзакції.
 
-```mermaid
-sequenceDiagram
-    actor U as Менеджер
-    participant R as routes/operations
-    participant F as InventoryFacade
-    participant C as Command
-    participant S as InventoryService
-    participant SR as StockRepository
-    participant ST as Strategy
-    participant SB as StockSubject
-    participant O as LowStockObserver
-    participant N as NotificationService
+![Діаграма послідовності складської операції](images/sequence-diagram.png)
 
-    U->>R: POST /operations/create
-    R->>F: create_movement(type, product, quantity, price)
-    F->>C: створити команду за типом
-    F->>C: execute()
-    C->>S: create_stock_movement(...)
-    S->>S: перевірити ID, кількість, ціну
-    S->>SR: create_movement(...)
-    SR->>SR: SELECT ... FOR UPDATE
-    SR->>ST: calculate_new_quantity(current, quantity)
-    ST-->>SR: новий залишок або ValueError
-    SR->>SR: INSERT stock_movements, UPDATE products, COMMIT
-    SR-->>S: movement_id
-    S->>SB: notify(product, quantity, min_quantity)
-    SB->>O: update(...)
-    O->>N: create_low_stock_notification(...)
-    S-->>R: movement_id
-    R-->>U: повідомлення про успіх
-```
+*Рисунок 3 – Діаграма послідовності: оформлення складської операції*
 
 ## 4. Архітектура
 
@@ -488,80 +178,9 @@ flowchart TB
 
 ## 6. База даних
 
-```mermaid
-erDiagram
-    SUPPLIERS ||--o{ PRODUCTS : "постачає"
-    PRODUCTS ||--o{ STOCK_MOVEMENTS : "рух"
-    USERS ||--o{ STOCK_MOVEMENTS : "виконав"
-    USERS ||--o{ DOCUMENTS : "створив"
-    CONTRACTORS ||--o{ DOCUMENTS : "контрагент"
-    SUPPLIERS ||--o{ DOCUMENTS : "постачальник"
-    DOCUMENTS ||--|{ DOCUMENT_ITEMS : "позиції"
-    PRODUCTS ||--o{ DOCUMENT_ITEMS : "у документі"
-    PRODUCTS ||--o{ NOTIFICATIONS : "сповіщення"
+![ER-діаграма бази даних СкладPro](images/er-diagram.png)
 
-    USERS {
-        int id PK
-        varchar username UK
-        varchar password_hash
-        enum role
-        boolean is_active
-    }
-    SUPPLIERS {
-        int id PK
-        varchar name
-        varchar contact_person
-        varchar phone
-        varchar email
-    }
-    CONTRACTORS {
-        int id PK
-        varchar name
-        enum contractor_type
-        varchar phone
-        varchar email
-    }
-    PRODUCTS {
-        int id PK
-        varchar name
-        varchar sku UK
-        int quantity
-        int min_quantity
-        decimal price
-        int supplier_id FK
-    }
-    STOCK_MOVEMENTS {
-        int id PK
-        int product_id FK
-        enum movement_type
-        int quantity
-        decimal unit_price
-        int created_by FK
-        timestamp created_at
-    }
-    DOCUMENTS {
-        int id PK
-        varchar document_number UK
-        enum document_type
-        int contractor_id FK
-        int supplier_id FK
-        int created_by FK
-        decimal total_amount
-    }
-    DOCUMENT_ITEMS {
-        int id PK
-        int document_id FK
-        int product_id FK
-        int quantity
-        decimal unit_price
-    }
-    NOTIFICATIONS {
-        int id PK
-        int product_id FK
-        varchar message
-        boolean is_read
-    }
-```
+*Рисунок 4 – ER-діаграма бази даних*
 
 | Таблиця | Обмеження та поведінка |
 |---|---|
